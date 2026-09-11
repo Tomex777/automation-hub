@@ -1,0 +1,46 @@
+name: Publish real Slumber instrument packs
+on:
+  push:
+    branches: [main]
+    paths:
+      - "slumber-packs/build_real_packs.py"
+      - ".github/workflows/slumber-real-packs.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-packs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install archive tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full
+      - name: Build Slumber packs from upstream CC0 recordings
+        run: python slumber-packs/build_real_packs.py
+      - name: Verify generated pack catalog
+        run: |
+          test -s slumber-packs/published/catalog.json
+          python - <<'PY'
+          import json, zipfile, pathlib
+          root=pathlib.Path('slumber-packs/published')
+          c=json.loads((root/'catalog.json').read_text())
+          assert len(c['packs']) >= 5
+          for p in c['packs']:
+              f=root/(p['packId']+'.zip')
+              assert f.stat().st_size > 100000
+              with zipfile.ZipFile(f) as z:
+                  assert 'manifest.json' in z.namelist()
+                  assert len(z.namelist()) > 2
+          PY
+      - name: Publish generated packs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add slumber-packs/published
+          if git diff --cached --quiet; then
+            echo "No pack changes"
+          else
+            git commit -m "Publish real Slumber CC0 instrument packs"
+            git push
+          fi
