@@ -1,0 +1,38 @@
+name: Publish Slumber 0.8.5 screenshots
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-slumber-085-screens.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified runtime proof
+        env:
+          PROOF_URL: "https://sdmntprnortheu.oaiusercontent.com/files/00000000-e534-81f4-b0cb-30bc9ac44e4b/raw?se=2026-09-11T21%3A28%3A07Z&sp=r&sv=2026-02-06&sr=b&scid=7e306df2-48b8-5104-989d-5b0576ab4c83&skoid=7b771594-2b4f-4e93-93be-fdeeeb59aaf9&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-11T06%3A38%3A01Z&ske=2026-09-12T06%3A38%3A01Z&sks=b&skv=2026-02-06&sig=f92xPuo3K9CveDtBXIg0Sn8xnQhlbM34oP6GykO7gOM%3D"
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 "$PROOF_URL" -o proof.zip
+          unzip -q proof.zip
+          cp 01-home.png slumber-home.png
+          cp 09-piano.png slumber-piano.png
+          cp 14-listen-repeat-turn.png slumber-ai-teacher.png
+          cp 05-pack-installed.png slumber-sound-packs.png
+          test -s slumber-home.png
+          test -s slumber-piano.png
+          test -s slumber-ai-teacher.png
+          test -s slumber-sound-packs.png
+
+      - name: Upload screenshots to existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload slumber-v0.8.5 \
+            slumber-home.png slumber-piano.png slumber-ai-teacher.png slumber-sound-packs.png \
+            --repo Tomex777/automation-hub --clobber
