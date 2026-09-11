@@ -21,7 +21,7 @@ jobs:
           unzip -q slumber-build.zip
           APK=$(find . -name 'Slumber-0.8.5-debug.apk' -type f -print -quit)
           test -n "$APK"
-          cp "$APK" Slumber-0.8.5-debug.apk
+          test "$APK" = './Slumber-0.8.5-debug.apk' || mv "$APK" Slumber-0.8.5-debug.apk
           echo '3a3bf9502dae51fcceb351e6f12db86e12a0be0716dd7981048d49556b49f069  Slumber-0.8.5-debug.apk' | sha256sum -c -
 
       - name: Publish GitHub release asset
