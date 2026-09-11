@@ -1,0 +1,36 @@
+name: Publish Slumber 0.8.5 APK
+
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-slumber-085-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified private build artifact
+        env:
+          ARTIFACT_URL: "https://sdmntpritalynorth.oaiusercontent.com/files/00000000-36a0-8246-8198-272406cbff94/raw?se=2026-09-11T21%3A25%3A57Z&sp=r&sv=2026-02-06&sr=b&scid=ed0a4442-aa32-54a0-9b98-67c32d7ff4a3&skoid=7b771594-2b4f-4e93-93be-fdeeeb59aaf9&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-11T07%3A35%3A03Z&ske=2026-09-12T07%3A35%3A03Z&sks=b&skv=2026-02-06&sig=aHqcG1r9qS%2BJp8BTKIiJX6op4oKxfQc0Z10qg7idseU%3D"
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 "$ARTIFACT_URL" -o slumber-build.zip
+          unzip -q slumber-build.zip
+          APK=$(find . -name 'Slumber-0.8.5-debug.apk' -type f -print -quit)
+          test -n "$APK"
+          cp "$APK" Slumber-0.8.5-debug.apk
+          echo '3a3bf9502dae51fcceb351e6f12db86e12a0be0716dd7981048d49556b49f069  Slumber-0.8.5-debug.apk' | sha256sum -c -
+
+      - name: Publish GitHub release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete slumber-v0.8.5 --repo Tomex777/automation-hub --yes --cleanup-tag 2>/dev/null || true
+          gh release create slumber-v0.8.5 Slumber-0.8.5-debug.apk \
+            --repo Tomex777/automation-hub \
+            --title 'Slumber 0.8.5' \
+            --notes 'Verified Android build of Slumber by Night. Tested on Android 36. SHA-256: 3a3bf9502dae51fcceb351e6f12db86e12a0be0716dd7981048d49556b49f069'
