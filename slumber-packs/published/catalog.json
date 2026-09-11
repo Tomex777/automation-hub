@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "packs": [
+    {
+      "packId": "freepats_upright_kw",
+      "catalogId": "piano.upright",
+      "title": "Upright Piano KW \u00b7 FreePats",
+      "instrument": "Upright Piano KW",
+      "url": "https://raw.githubusercontent.com/Tomex777/automation-hub/main/slumber-packs/published/freepats_upright_kw.zip",
+      "sourceUrl": "https://freepats.zenvoid.org/Piano/acoustic-grand-piano.html",
+      "license": "CC0-1.0",
+      "size": 7213528,
+      "sha256": "44f001a184656a2e01d776f58df23eb7b80f8611269d1e57f4ddd404e079e001"
+    },
+    {
+      "packId": "freepats_old_piano_fb",
+      "catalogId": "piano.tack",
+      "title": "Old Piano FB \u00b7 FreePats",
+      "instrument": "Old Piano FB",
+      "url": "https://raw.githubusercontent.com/Tomex777/automation-hub/main/slumber-packs/published/freepats_old_piano_fb.zip",
+      "sourceUrl": "https://freepats.zenvoid.org/Piano/honky-tonk-piano.html",
+      "license": "CC0-1.0",
+      "size": 9600795,
+      "sha256": "84f346d7de76d2938b685970aa9acd849eaf039c2ed1cd3642d145a8928a0551"
+    },
+    {
+      "packId": "freepats_fm_piano2",
+      "catalogId": "ep.fm",
+      "title": "FM Piano 2 \u00b7 FreePats",
+      "instrument": "FM Piano 2",
+      "url": "https://raw.githubusercontent.com/Tomex777/automation-hub/main/slumber-packs/published/freepats_fm_piano2.zip",
+      "sourceUrl": "https://freepats.zenvoid.org/ElectricPiano/synthesized-piano.html",
+      "license": "CC0-1.0",
+      "size": 20131156,
+      "sha256": "124135877d0fa5681e37ced9e12f10059cc55fdeefea6bd4040a8bdbf16da496"
+    },
+    {
+      "packId": "freepats_drawbar_organ",
+      "catalogId": "organ.tonewheel",
+      "title": "Drawbar Organ \u00b7 FreePats",
+      "instrument": "Drawbar Organ",
+      "url": "https://raw.githubusercontent.com/Tomex777/automation-hub/main/slumber-packs/published/freepats_drawbar_organ.zip",
+      "sourceUrl": "https://freepats.zenvoid.org/Organ/electric-organ.html",
+      "license": "CC0-1.0",
+      "size": 6369302,
+      "sha256": "ff3511cd60b5d01991756b67a798f68274b67b9c2800b4d333ebfe1def1c0d2d"
+    },
+    {
+      "packId": "freepats_church_organ",
+      "catalogId": "organ.pipe",
+      "title": "Church Organ \u00b7 FreePats",
+      "instrument": "Church Organ",
+      "url": "https://raw.githubusercontent.com/Tomex777/automation-hub/main/slumber-packs/published/freepats_church_organ.zip",
+      "sourceUrl": "https://freepats.zenvoid.org/Organ/pipe-organ.html",
+      "license": "CC0-1.0",
+      "size": 14094637,
+      "sha256": "dfbb833b2dfe76d0759c05e0398e9d38b0fa68a90762a09c66933bc6b77d29d5"
+    }
+  ]
+}
