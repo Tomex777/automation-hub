@@ -81,4 +81,5 @@ def build(pack_id: str, cfg: dict):
     print(target, target.stat().st_size, hashlib.sha256(target.read_bytes()).hexdigest())
 
 if __name__ == '__main__':
+    # Generated files are committed by GitHub Actions and served through raw.githubusercontent.com.
     for pid, cfg in PACKS.items(): build(pid, cfg)
