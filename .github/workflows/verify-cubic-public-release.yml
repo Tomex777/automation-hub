@@ -1,0 +1,43 @@
+name: Verify Cubic Public Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-cubic-public-release.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download public APK
+        run: |
+          set -euo pipefail
+          url="https://github.com/Tomex777/automation-hub/releases/download/cubic-v1.0.0/Cubic-universal-release.apk"
+          curl --fail --location --retry 3 --retry-delay 2 "$url" -o /tmp/Cubic-universal-release.apk
+          test -s /tmp/Cubic-universal-release.apk
+
+      - name: Verify production bytes and universal ABIs
+        run: |
+          set -euo pipefail
+          echo "fa0d713bb34e2d8f168f03c5c66e04bf754aaf13e3019918f66bd51c269e7f80  /tmp/Cubic-universal-release.apk" | sha256sum -c -
+          unzip -l /tmp/Cubic-universal-release.apk > /tmp/cubic-apk-contents.txt
+          for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+            grep -q "lib/$abi/" /tmp/cubic-apk-contents.txt || {
+              echo "Missing ABI: $abi" >&2
+              exit 1
+            }
+          done
+
+      - name: Verify public evidence and screenshots
+        run: |
+          set -euo pipefail
+          base="https://github.com/Tomex777/automation-hub/releases/download/cubic-v1.0.0"
+          for asset in             PRODUCTION_APK_SHA256.txt             PRODUCTION_SIGNATURE.txt             RELEASE_STATUS.txt             cubic-home.png             cubic-controls-sheet.png             cubic-3x3x5.png             cubic-9x9x9.png             cubic-guided-step.png             cubic-guided-solved.png; do
+            curl --fail --location --silent --show-error "$base/$asset" -o "/tmp/$asset"
+            test -s "/tmp/$asset"
+          done
+          grep -q "productionSigned=true" /tmp/RELEASE_STATUS.txt
+          grep -q "versionName=1.0.0" /tmp/RELEASE_STATUS.txt
+          grep -qi "CFD16302F35EA53892D2B319D6A52A0D0E9A53A5310B0CE20EFD99773A9F4CBE" /tmp/PRODUCTION_SIGNATURE.txt
