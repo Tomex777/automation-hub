@@ -1,0 +1,24 @@
+name: Freeze Cubic Old-Key APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/freeze-cubic-old-key.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove old-key Cubic install and signing evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for asset in             Cubic-universal-release.apk             PRODUCTION_APK_SHA256.txt             PRODUCTION_SIGNATURE.txt             RELEASE_STATUS.txt; do
+            gh release delete-asset cubic-v1.0.0 "$asset" --yes || true
+          done
