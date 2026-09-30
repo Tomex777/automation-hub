@@ -1,0 +1,56 @@
+name: Publish Cubic 1.0.0 Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-cubic-100-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-cubic-100-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch validated production package
+        env:
+          SOURCE_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-ee1c-81f4-aed4-2780924766f0/raw?se=2026-09-30T09%3A49%3A36Z&sp=r&sv=2026-02-06&sr=b&scid=a8ff2d9a-dc7b-5199-b264-98fad50ab51d&skoid=1d6acb5b-b3f4-43ec-a5ec-b05c4a7708c8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-30T04%3A50%3A35Z&ske=2026-10-01T04%3A50%3A35Z&sks=b&skv=2026-02-06&sig=IAxpFLtBZ5WhfopJvXqN11MJjWuGUHnn0RqKGCFcKOk%3D'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cubic
+          curl --fail --location --retry 3 --retry-delay 2 "$SOURCE_URL" -o /tmp/cubic-release.zip
+          unzip -q /tmp/cubic-release.zip -d /tmp/cubic
+          test -s /tmp/cubic/Cubic-universal-release.apk
+          echo "fa0d713bb34e2d8f168f03c5c66e04bf754aaf13e3019918f66bd51c269e7f80  /tmp/cubic/Cubic-universal-release.apk" | sha256sum -c -
+          grep -q "productionSigned=true" /tmp/cubic/RELEASE_STATUS.txt
+          grep -q "versionName=1.0.0" /tmp/cubic/RELEASE_STATUS.txt
+
+      - name: Publish public Cubic release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG="cubic-v1.0.0"
+          files=(
+            /tmp/cubic/Cubic-universal-release.apk
+            /tmp/cubic/PRODUCTION_APK_SHA256.txt
+            /tmp/cubic/PRODUCTION_SIGNATURE.txt
+            /tmp/cubic/RELEASE_STATUS.txt
+          )
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --clobber
+          else
+            gh release create "$TAG" "${files[@]}" \
+              --target main \
+              --title "Cubic 1.0.0" \
+              --notes "Cubic 1.0.0 universal Android release. Production-signed with the permanent Cubic key and validated on Android API 26 and API 36. Includes cubes and cuboids from 2 to 9 layers per axis, 3D orbit/zoom, animated face and inner-layer turns, scramble/undo/reset, and guided solving for states created inside Cubic. Arbitrary external real-world puzzle-state solving is not claimed in v1."
+          fi
