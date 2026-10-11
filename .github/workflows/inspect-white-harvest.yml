@@ -1,0 +1,35 @@
+name: Inspect White Harvest reference
+on:
+  push:
+    branches:
+      - research/white-harvest-source
+    paths:
+      - .github/workflows/inspect-white-harvest.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright Chromium
+        run: |
+          mkdir -p /tmp/white-harvest-browser
+          cd /tmp/white-harvest-browser
+          npm init -y >/dev/null
+          npm install --silent playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Inspect browser-rendered page
+        env:
+          NODE_PATH: /tmp/white-harvest-browser/node_modules
+        run: node research/white-harvest/capture.cjs
+      - name: Upload captured reference
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: white-harvest-reference-capture
+          path: white-harvest-inspection/
+          if-no-files-found: warn
+          retention-days: 7
