@@ -1,0 +1,33 @@
+name: Check link hub v2
+on:
+  push:
+    branches: [research/white-harvest-source]
+    paths: [.github/workflows/check-linkhub-v2.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Playwright browser
+        run: |
+          cd /tmp
+          mkdir -p linkhub-check
+          cd linkhub-check
+          npm init -y >/dev/null
+          npm install --silent playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: E2E check live prototype
+        env:
+          NODE_PATH: /tmp/linkhub-check/node_modules
+        run: node research/white-harvest/test-v2.cjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkhub-v2-browser-check
+          path: linkhub-v2-check/
+          if-no-files-found: warn
+          retention-days: 7
