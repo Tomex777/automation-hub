@@ -1,6 +1,7 @@
 package app.cubic;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -789,8 +790,8 @@ public final class MainActivity extends Activity {
             return Color.argb(a, r, g, b);
         }
 
-        private static int dp(Activity activity, float value) {
-            return Math.round(value * activity.getResources().getDisplayMetrics().density);
+        private static int dp(Context context, float value) {
+            return Math.round(value * context.getResources().getDisplayMetrics().density);
         }
     }
 
