@@ -477,7 +477,6 @@ public final class MainActivity extends Activity {
             }
             if (turns == 2) {
                 turnHalf(axis, layer);
-                turnHalf(axis, layer);
                 return;
             }
             int repeats = turns < 0 ? 3 : 1;
