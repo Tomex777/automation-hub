@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cubic-rebuild-v1.0.1
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build and verify Android APK
+    name: Build and publish Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -54,7 +54,7 @@ jobs:
           sha256sum "$APK" | tee cubic-android/app/build/outputs/apk/debug/SHA256SUMS.txt
           ls -lh "$APK"
 
-      - name: Upload installable debug APK
+      - name: Upload installable debug APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: cubic-rebuild-v1.0.1-debug-apk
@@ -63,3 +63,21 @@ jobs:
             cubic-android/app/build/outputs/apk/debug/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish GitHub release download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: cubic-rebuild-v1.0.1
+          target_commitish: cubic/rebuild-v1.0.1
+          name: Cubic Android Rebuild v1.0.1
+          body: |
+            Source-based Android rebuild of Cubic.
+
+            **Build type:** Debug APK signed with the Android debug key.
+            **Compatibility:** This is a rebuild and is not signed with the original Cubic production key. It cannot update an installation signed with that key; uninstalling the old app may erase its local data.
+            **Testing:** CI compilation and APK signature verification passed. Runtime testing on a physical device has not yet been confirmed.
+          prerelease: true
+          files: |
+            cubic-android/app/build/outputs/apk/debug/app-debug.apk
+            cubic-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          fail_on_unmatched_files: true
