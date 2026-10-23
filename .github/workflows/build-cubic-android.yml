@@ -1,0 +1,65 @@
+name: Build Cubic Android Rebuild
+
+on:
+  push:
+    branches:
+      - cubic/rebuild-v1.0.1
+    paths:
+      - 'cubic-android/**'
+      - '.github/workflows/build-cubic-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cubic-rebuild-v1.0.1
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and verify Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install required Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build Cubic
+        run: gradle --no-daemon -p cubic-android clean assembleDebug
+
+      - name: Verify generated APK
+        run: |
+          set -euo pipefail
+          APK="cubic-android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          sha256sum "$APK" | tee cubic-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          ls -lh "$APK"
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cubic-rebuild-v1.0.1-debug-apk
+          path: |
+            cubic-android/app/build/outputs/apk/debug/app-debug.apk
+            cubic-android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
